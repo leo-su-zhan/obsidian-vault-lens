@@ -1,4 +1,4 @@
-﻿# Obsidian File Preview
+﻿# Quick Preview
 
 [![GitHub release](https://img.shields.io/github/v/release/leo-su-zhan/obsidian-file-preview)](https://github.com/leo-su-zhan/obsidian-file-preview/releases)
 
@@ -38,7 +38,7 @@
 
 ### 社区插件市场（待上架）
 
-打开 Obsidian → 设置 → 社区插件 → 搜索 **File Preview** → 安装启用。
+打开 Obsidian → 设置 → 社区插件 → 搜索 **Quick Preview** → 安装启用。
 
 ### 手动安装
 
@@ -80,3 +80,4 @@ npm run deploy
 ## 许可证
 
 MIT
+

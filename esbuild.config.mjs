@@ -1,8 +1,6 @@
-import * as esbuild from "esbuild";
+﻿import * as esbuild from "esbuild";
 
 const prod = process.argv[2] === "production";
-
-const outfile = process.env.OUTFILE || "main.js";
 
 const context = await esbuild.context({
 	entryPoints: ["src/main.ts"],
@@ -13,7 +11,7 @@ const context = await esbuild.context({
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
-	outfile,
+	outfile: "main.js",
 });
 
 if (prod) {
