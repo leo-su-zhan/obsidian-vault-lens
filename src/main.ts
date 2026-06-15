@@ -3,13 +3,6 @@ import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 import { PptxViewer, RECOMMENDED_ZIP_LIMITS } from "@aiden0z/pptx-renderer";
 import JSZip from "jszip";
-// Patch: jszip creates <script> elements for compatibility detection.
-// Return a harmless <div> instead to satisfy Obsidian security audit.
-const _origCE = document.createElement.bind(document);
-document.createElement = function(tag: string, options?: ElementCreationOptions) {
-	if (tag.toLowerCase() === "script") return _origCE("div");
-	return _origCE(tag, options);
-} as typeof document.createElement;
 
 const VIEW_TYPE = "file-preview";
 const CODE_EXTENSIONS = [

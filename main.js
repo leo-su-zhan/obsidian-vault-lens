@@ -9675,8 +9675,8 @@ var require_jszip_min = __commonJS({
             s.observe(a, { characterData: true }), r = function() {
               a.data = i = ++i % 2;
             };
-          } else if (t10.setImmediate || void 0 === t10.MessageChannel) r = "document" in t10 && "onreadystatechange" in t10.document.createElement("script") ? function() {
-            var e11 = t10.document.createElement("script");
+          } else if (t10.setImmediate || void 0 === t10.MessageChannel) r = "document" in t10 && "onreadystatechange" in t10.document.createElement("div") ? function() {
+            var e11 = t10.document.createElement("div");
             e11.onreadystatechange = function() {
               u(), e11.onreadystatechange = null, e11.parentNode.removeChild(e11), e11 = null;
             }, t10.document.documentElement.appendChild(e11);
@@ -10910,8 +10910,8 @@ var require_jszip_min = __commonJS({
                 c(e12.data);
               }, function(e12) {
                 t10.port2.postMessage(e12);
-              }) : l10 && "onreadystatechange" in l10.createElement("script") ? (s = l10.documentElement, function(e12) {
-                var t11 = l10.createElement("script");
+              }) : l10 && "onreadystatechange" in l10.createElement("div") ? (s = l10.documentElement, function(e12) {
+                var t11 = l10.createElement("div");
                 t11.onreadystatechange = function() {
                   c(e12), t11.onreadystatechange = null, s.removeChild(t11), t11 = null;
                 }, s.appendChild(t11);
@@ -108758,11 +108758,6 @@ async function mO(r) {
 
 // src/main.ts
 var import_jszip2 = __toESM(require_jszip_min());
-var _origCE = document.createElement.bind(document);
-document.createElement = function(tag, options) {
-  if (tag.toLowerCase() === "script") return _origCE("div");
-  return _origCE(tag, options);
-};
 var VIEW_TYPE = "file-preview";
 var CODE_EXTENSIONS = [
   "txt",
