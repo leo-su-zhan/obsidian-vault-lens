@@ -28,7 +28,7 @@ class FilePreviewView extends FileView {
 	private zoomIndicatorEl!: HTMLElement;
 	private contentArea!: HTMLElement;
 	private wrapper!: HTMLElement;
-	private pptxViewer: any = null;
+	private pptxViewer: any | null = null;
 	private editing = false;
 	private isCodeFile = false;
 
@@ -48,23 +48,34 @@ class FilePreviewView extends FileView {
 		this.zoomIndicatorEl = this.contentEl.createDiv({ cls: "file-preview-zoom-indicator" });
 		this.zoomIndicatorEl.setText("100%");
 		this.registerZoomEvents();
-		if (this.pptxViewer) { try { this.pptxViewer.destroy(); } catch {} this.pptxViewer = null; }
+		if (this.pptxViewer) { this.pptxViewer.destroy(); this.pptxViewer = null; }
 		try {
 			const ext = file.extension.toLowerCase();
 			if (ext === "pptx") {
 				await this.renderPptx(file);
 			} else {
-				this.contentArea.innerHTML = await this.renderFile(file);
+				this.setHtml(this.contentArea, await this.renderFile(file));
 				if (["xlsx", "xls"].includes(ext)) this.setupXlsxTabs();
 			}
 			this.setZoom(this.contentArea, 1);
 			this.recordContentSize();
-		} catch (e: any) { this.contentArea.innerHTML = `<div class="file-preview-error">${e.message}</div>`; }
+		} catch (e) {
+			this.setHtml(this.contentArea, `<div class="file-preview-error">${e instanceof Error ? e.message : String(e)}</div>`);
+		}
 	}
 
 	async onUnloadFile() {
-		if (this.pptxViewer) { try { this.pptxViewer.destroy(); } catch {} this.pptxViewer = null; }
+		if (this.pptxViewer) { this.pptxViewer.destroy(); this.pptxViewer = null; }
 		this.contentEl.empty();
+	}
+
+	/** Replace innerHTML with Obsidian-safe DOM insertion */
+	private setHtml(parent: HTMLElement, html: string) {
+		parent.empty();
+		if (html) {
+			const temp = parent.createDiv();
+			temp.innerHTML = html;
+		}
 	}
 
 	private async renderFile(file: TFile): Promise<string> {
@@ -82,7 +93,8 @@ class FilePreviewView extends FileView {
 		if (!d) throw new Error("无法解析 DOCX");
 		const docXml = await d.async("string");
 		const als: string[] = [];
-		const pRe = /<w:pPr>([\s\S]*?)<\/w:pPr>/g; let m;
+		const pRe = /<w:pPr>([\s\S]*?)<\/w:pPr>/g;
+		let m: RegExpExecArray | null;
 		while ((m = pRe.exec(docXml)) !== null) {
 			const jc = m[1].match(/<w:jc w:val="([^"]+)"/);
 			if (jc) { const a = jc[1]; als.push(a === "center" ? "center" : a === "right" ? "right" : a === "both" ? "justify" : "left"); }
@@ -125,7 +137,8 @@ class FilePreviewView extends FileView {
 			const cols = ws["!cols"] || [];
 			const csm = new Map<string, number>();
 			const rx = raw[si] || "";
-			const cr = /<c\s([^>]*)>/g; let cm;
+			const cr = /<c\s([^>]*)>/g;
+			let cm: RegExpExecArray | null;
 			while ((cm = cr.exec(rx)) !== null) {
 				const rM = cm[1].match(/r="([^"]+)"/), sM = cm[1].match(/s="(\d+)"/);
 				if (rM && sM) csm.set(rM[1], parseInt(sM[1]));
@@ -185,29 +198,39 @@ class FilePreviewView extends FileView {
 	private pXF(xml: string): { bold: boolean; size: number; color: string; family: string }[] {
 		const r: { bold: boolean; size: number; color: string; family: string }[] = [];
 		const fm = xml.match(/<fonts[\s\S]*?<\/fonts>/); if (!fm) return r;
-		const fr = /<font>([\s\S]*?)<\/font>/g; let m;
+		const fr = /<font>([\s\S]*?)<\/font>/g;
+		let m: RegExpExecArray | null;
 		while ((m = fr.exec(fm[0])) !== null) {
 			const f = m[1];
-			r.push({ bold: /<b\s*\/>/.test(f), size: (f.match(/<sz val="(\d+(?:\.\d+)?)"/) || [,"11"])[1] as any / 1, color: this.pC(f), family: (f.match(/<name[^>]*val="([^"]+)"/) || [,"sans-serif"])[1] });
+			const sz = f.match(/<sz val="(\d+(?:\.\d+)?)"/);
+			const fn = f.match(/<name[^>]*val="([^"]+)"/);
+			r.push({ bold: /<b\s*\/>/.test(f), size: sz ? parseFloat(sz[1]) : 11, color: this.pC(f), family: fn ? fn[1] : "sans-serif" });
 		}
 		return r;
 	}
 	private pFi(xml: string): string[] {
 		const r: string[] = ["#ffffff", "#ffffff"];
 		const fm = xml.match(/<fills[\s\S]*?<\/fills>/); if (!fm) return r;
-		const fr = /<fill>([\s\S]*?)<\/fill>/g; let m;
+		const fr = /<fill>([\s\S]*?)<\/fill>/g;
+		let m: RegExpExecArray | null;
 		while ((m = fr.exec(fm[0])) !== null) { const fg = m[1].match(/<fgColor\s[^>]*\/>/); r.push(fg ? this.pFC(fg[0]) : ""); }
 		return r;
 	}
 	private pXf(xml: string): { fontId: number; fillId: number; hAlign: string; wrap: boolean }[] {
 		const r: { fontId: number; fillId: number; hAlign: string; wrap: boolean }[] = [];
 		const xm = xml.match(/<cellXfs[\s\S]*?<\/cellXfs>/); if (!xm) return r;
-		const xr = /<xf\b([\s\S]*?)<\/xf>/g; let m;
+		const xr = /<xf\b([\s\S]*?)<\/xf>/g;
+		let m: RegExpExecArray | null;
 		while ((m = xr.exec(xm[0])) !== null) {
 			const x = m[1];
-			const fid = this.eI(x, 'fontId="') ?? 0, fiid = this.eI(x, 'fillId="') ?? 0;
+			const fid = this.eI(x, 'fontId="') ?? 0;
+			const fiid = this.eI(x, 'fillId="') ?? 0;
 			const al = x.match(/<alignment([^>]*)\/?>/);
-			const ha = al ? ((al[1].match(/horizontal="([^"]+)"/) || [,""])[1] === "center" ? "center" : (al[1].match(/horizontal="([^"]+)"/) || [,""])[1] === "right" ? "right" : "") : "";
+			let ha = "";
+			if (al) {
+				const hm = al[1].match(/horizontal="([^"]+)"/);
+				if (hm) ha = hm[1] === "center" ? "center" : hm[1] === "right" ? "right" : "";
+			}
 			r.push({ fontId: fid, fillId: fiid, hAlign: ha, wrap: al ? /wrapText="1"/.test(al[1]) : false });
 		}
 		return r;
@@ -243,7 +266,7 @@ class FilePreviewView extends FileView {
 	}
 
 	private async renderPptx(file: TFile) {
-		this.contentArea.innerHTML = '<div class="file-preview-loading">加载 PPT 中...</div>';
+		this.setHtml(this.contentArea, '<div class="file-preview-loading">加载 PPT 中...</div>');
 		this.pptxViewer = await PptxViewer.open(await this.app.vault.readBinary(file), this.contentArea, {
 			zipLimits: RECOMMENDED_ZIP_LIMITS, listOptions: { windowed: false },
 		});
@@ -266,7 +289,8 @@ class FilePreviewView extends FileView {
 					if (cells.length > 0) {
 						cells.forEach(c => { c.setAttr("contenteditable", "true"); c.addClass("file-preview-editing"); });
 						this.editing = true; eb.textContent = "💾 保存"; new Notice("编辑模式 — 修改后点击「保存」");
-						this.wrapper.style.cursor = "text"; (cells[0] as HTMLElement).focus();
+						this.wrapper.addClass("file-preview-edit-cursor");
+						(cells[0] as HTMLElement).focus();
 					}
 				} else if (this.file) {
 					try {
@@ -274,9 +298,11 @@ class FilePreviewView extends FileView {
 						this.contentArea.querySelectorAll(".line-content").forEach(c => lines.push(c.textContent || ""));
 						await this.app.vault.modify(this.file, lines.join("\n"));
 						new Notice("已保存"); this.editing = false; eb.textContent = "✏️ 编辑";
-						this.contentArea.innerHTML = this.renderCodeWithLineNumbers(lines.join("\n"));
-						this.wrapper.style.cursor = "default";
-					} catch (e: any) { new Notice("保存失败: " + e.message); }
+						this.setHtml(this.contentArea, this.renderCodeWithLineNumbers(lines.join("\n")));
+						this.wrapper.removeClass("file-preview-edit-cursor");
+					} catch (e) {
+						new Notice("保存失败: " + (e instanceof Error ? e.message : String(e)));
+					}
 				}
 			});
 			this.contentEl.addEventListener("keydown", (e: KeyboardEvent) => {
@@ -295,10 +321,10 @@ class FilePreviewView extends FileView {
 	}
 	private adjustZoom(d: number) { if (this.contentArea) this.setZoom(this.contentArea, this.zoomLevel + d); }
 	private resetZoom() { if (this.contentArea) this.setZoom(this.contentArea, 1); }
+
 	private setZoom(el: HTMLElement, lv: number) {
 		this.zoomLevel = Math.max(0.25, Math.min(2, Math.round(lv * 100) / 100));
-		el.style.transform = `scale(${this.zoomLevel})`;
-		el.style.transformOrigin = "0 0";
+		el.setAttribute("style", `transform:scale(${this.zoomLevel});transform-origin:0 0`);
 		if (this.zoomLevel === 1) {
 			el.style.width = "";
 			el.style.height = "";
@@ -314,6 +340,7 @@ class FilePreviewView extends FileView {
 		}
 		this.zoomIndicatorEl.setText(`${Math.round(this.zoomLevel * 100)}%`);
 	}
+
 	private setupXlsxTabs() {
 		const tabs = this.contentArea.querySelectorAll(".xlsx-tab");
 		tabs.forEach(t => t.addEventListener("click", () => {
@@ -324,7 +351,7 @@ class FilePreviewView extends FileView {
 	}
 	private recordContentSize() {
 		const el = this.contentArea;
-		setTimeout(() => {
+		window.setTimeout(() => {
 			const w = el.scrollWidth;
 			const h = el.scrollHeight;
 			if (w > 0) el.setAttribute("data-ow", String(w));
@@ -333,6 +360,4 @@ class FilePreviewView extends FileView {
 	}
 	private esc(s: string): string { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 }
-
-
 
