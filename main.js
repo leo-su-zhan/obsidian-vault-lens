@@ -108758,6 +108758,11 @@ async function mO(r) {
 
 // src/main.ts
 var import_jszip2 = __toESM(require_jszip_min());
+var _origCE = document.createElement.bind(document);
+document.createElement = function(tag, options) {
+  if (tag.toLowerCase() === "script") return _origCE("div");
+  return _origCE(tag, options);
+};
 var VIEW_TYPE = "file-preview";
 var CODE_EXTENSIONS = [
   "txt",
