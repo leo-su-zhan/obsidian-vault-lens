@@ -72,8 +72,12 @@ class FilePreviewView extends FileView {
 	private setHtml(parent: HTMLElement, html: string) {
 		parent.empty();
 		if (!html) return;
-		const frag = document.createRange().createContextualFragment(html);
-		parent.appendChild(frag);
+		const wrapper = parent.createDiv();
+		wrapper.innerHTML = html;
+		while (wrapper.firstChild) {
+			parent.appendChild(wrapper.firstChild);
+		}
+		wrapper.remove();
 	}
 
 	private async renderFile(file: TFile): Promise<string> {

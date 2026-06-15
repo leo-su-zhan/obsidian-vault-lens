@@ -108884,8 +108884,12 @@ var FilePreviewView = class extends import_obsidian.FileView {
   setHtml(parent, html) {
     parent.empty();
     if (!html) return;
-    const frag = document.createRange().createContextualFragment(html);
-    parent.appendChild(frag);
+    const wrapper = parent.createDiv();
+    wrapper.innerHTML = html;
+    while (wrapper.firstChild) {
+      parent.appendChild(wrapper.firstChild);
+    }
+    wrapper.remove();
   }
   async renderFile(file) {
     const ext = file.extension.toLowerCase();
