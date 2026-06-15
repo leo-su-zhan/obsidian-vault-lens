@@ -50,7 +50,7 @@
 
 ```bash
 # 克隆
-git clone https://github.com/leo-su-zhan/obsidian-file-preview.git
+git clone https://github.com/leo-su-zhan/obsidian-quick-preview.git
 cd obsidian-file-preview
 
 # 安装依赖
