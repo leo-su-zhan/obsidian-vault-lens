@@ -1,11 +1,13 @@
 ﻿{
-	"id": "quick-preview",
-	"name": "Quick Preview",
+	"id": "file-viewer",
+	"name": "File Viewer",
 	"version": "0.1.0",
 	"minAppVersion": "1.5.0",
-	"description": "在 Obsidian 中直接预览办公文档（docx/xlsx/pptx）和 60+ 种代码文件，支持缩放、编辑保存、行号显示与工作表切换。",
+	"description": "Preview docx/xlsx/pptx and 60+ code files (sql/java/py/js/ts/…). Zoom, edit & save, line numbers, XLSX tabs.",
 	"author": "suzhan",
 	"isDesktopOnly": false
 }
+
+
 
 

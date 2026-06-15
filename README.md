@@ -1,18 +1,18 @@
-﻿# Quick Preview
+﻿# Obsidian File Viewer
 
-[![GitHub release](https://img.shields.io/github/v/release/leo-su-zhan/obsidian-file-preview)](https://github.com/leo-su-zhan/obsidian-file-preview/releases)
+[![GitHub release](https://img.shields.io/github/v/release/leo-su-zhan/obsidian-file-viewer)](https://github.com/leo-su-zhan/obsidian-file-viewer/releases)
 
-一个 Obsidian 插件，支持在 Obsidian 内直接预览 **docx / xlsx / pptx / 代码文件** 等常见文件。支持缩放、编辑保存、行号显示、XLSX 工作表切换。
+一个 Obsidian 插件，支持在 Obsidian 内直接预览 **docx / xlsx / pptx / 代码文件** 等常见文件。支持缩放、编辑保存、行号显示、工作表切换。
 
 ## 功能
 
 ### 📄 办公文件
 
-| 类型 | 渲染引擎 | 特性 |
-|---|---|---|
-| **DOCX** | mammoth.js | 保留标题/表格/图片，分页虚线分割，居中/右对齐样式 |
-| **XLSX** | SheetJS + 自定义样式解析 | 保留字体颜色/大小/加粗、单元格填充色、合并单元格、列宽 |
-| **PPTX** | @aiden0z/pptx-renderer | 视觉化渲染，保留背景图/文字位置/装饰形状，类似 PDF 导出 |
+| 类型 | 特性 |
+|---|---|
+| **DOCX** | 保留标题/表格/图片，分页虚线分割，居中/右对齐样式 |
+| **XLSX** | 保留字体颜色/大小/加粗、单元格填充色、合并单元格、列宽 |
+| **PPTX** | 视觉化渲染，保留背景图/文字位置/装饰形状，类似 PDF 导出 |
 
 ### 💻 代码/文本文件
 
@@ -38,46 +38,24 @@
 
 ### 社区插件市场（待上架）
 
-打开 Obsidian → 设置 → 社区插件 → 搜索 **Quick Preview** → 安装启用。
+打开 Obsidian → 设置 → 社区插件 → 搜索 **File Viewer** → 安装启用。
 
 ### 手动安装
 
-1. 在 https://github.com/leo-su-zhan/obsidian-quick-preview 下载最新版
-2. 将 `main.js`、`manifest.json`、`styles.css` 放入 `.obsidian/plugins/file-preview/`
+1. 在 [Releases](https://github.com/leo-su-zhan/obsidian-file-viewer/releases) 下载最新版
+2. 将 `main.js`、`manifest.json`、`styles.css` 放入 `.obsidian/plugins/file-viewer/`
 3. 在 Obsidian 设置 → 社区插件中启用
 
 ## 开发
 
 ```bash
-# 克隆
-git clone https://github.com/leo-su-zhan/obsidian-quick-preview.git
-cd obsidian-file-preview
-
-# 安装依赖
+git clone https://github.com/leo-su-zhan/obsidian-file-viewer.git
+cd obsidian-file-viewer
 npm install
-
-# 开发模式（监听文件变化，构建到本地仓库）
-npm run dev
-
-# 生产构建
-npm run build
-
-# 构建并部署到本地的 Obsidian 仓库
-npm run deploy
+npm run dev      # 开发模式（监听）
+npm run build    # 生产构建
 ```
-
-## 截图
-
-> 待补充
-
-## 依赖
-
-- [mammoth.js](https://github.com/mwilliamson/mammoth.js) — DOCX → HTML
-- [SheetJS](https://sheetjs.com/) — XLSX 解析
-- [@aiden0z/pptx-renderer](https://github.com/aiden0z/pptx-renderer) — PPTX 视觉化渲染
-- [JSZip](https://stuk.github.io/jszip/) — ZIP 解析
 
 ## 许可证
 
 MIT
-
