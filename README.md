@@ -42,7 +42,7 @@
 
 ### 手动安装
 
-1. 在 [Releases](https://github.com/leo-su-zhan/obsidian-file-preview/releases) 下载最新版
+1. 在 https://github.com/leo-su-zhan/obsidian-quick-preview 下载最新版
 2. 将 `main.js`、`manifest.json`、`styles.css` 放入 `.obsidian/plugins/file-preview/`
 3. 在 Obsidian 设置 → 社区插件中启用
 
