@@ -1,12 +1,13 @@
 ﻿{
-	"id": "file-viewer",
-	"name": "File Viewer",
+	"id": "vault-lens",
+	"name": "Vault Lens",
 	"version": "0.1.0",
 	"minAppVersion": "1.5.0",
 	"description": "Preview docx/xlsx/pptx and 60+ code files (sql/java/py/js/ts/…). Zoom, edit & save, line numbers, XLSX tabs.",
 	"author": "suzhan",
 	"isDesktopOnly": false
 }
+
 
 
 

@@ -34,7 +34,7 @@ class FilePreviewView extends FileView {
 
 	constructor(leaf: WorkspaceLeaf) { super(leaf); }
 	getViewType(): string { return VIEW_TYPE; }
-	getDisplayText(): string { return this.file?.basename ?? "File Viewer"; }
+	getDisplayText(): string { return this.file?.basename ?? "Vault Lens"; }
 
 	async onLoadFile(file: TFile) {
 		this.isCodeFile = CODE_EXTENSIONS.includes(file.extension.toLowerCase());
@@ -333,5 +333,6 @@ class FilePreviewView extends FileView {
 	}
 	private esc(s: string): string { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 }
+
 
 

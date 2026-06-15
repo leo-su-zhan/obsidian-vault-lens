@@ -1,12 +1,12 @@
 ﻿{
-	"name": "obsidian-file-viewer",
+	"name": "obsidian-vault-lens",
 	"version": "0.1.0",
 	"description": "在 Obsidian 中直接预览办公文档（docx/xlsx/pptx）和 60+ 种代码文件，支持缩放、编辑保存、行号显示与工作表切换。",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-		"deploy": "npm run build && copy /Y main.js styles.css manifest.json D:\\工具\\笔记工具\\ObsidianRepository\\repository\\.obsidian\\plugins\\file-viewer\\"
+		"deploy": "npm run build && copy /Y main.js styles.css manifest.json D:\\工具\\笔记工具\\ObsidianRepository\\repository\\.obsidian\\plugins\\vault-lens\\"
 	},
 	"devDependencies": {
 		"@types/node": "^20.0.0",
@@ -23,6 +23,7 @@
 		"xlsx": "^0.18.5"
 	}
 }
+
 
 
 

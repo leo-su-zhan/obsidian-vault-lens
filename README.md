@@ -1,6 +1,6 @@
-﻿# Obsidian File Viewer
+﻿# Obsidian Vault Lens
 
-[![GitHub release](https://img.shields.io/github/v/release/leo-su-zhan/obsidian-file-viewer)](https://github.com/leo-su-zhan/obsidian-file-viewer/releases)
+[![GitHub release](https://img.shields.io/github/v/release/leo-su-zhan/obsidian-vault-lens)](https://github.com/leo-su-zhan/obsidian-vault-lens/releases)
 
 一个 Obsidian 插件，支持在 Obsidian 内直接预览 **docx / xlsx / pptx / 代码文件** 等常见文件。支持缩放、编辑保存、行号显示、工作表切换。
 
@@ -38,19 +38,19 @@
 
 ### 社区插件市场（待上架）
 
-打开 Obsidian → 设置 → 社区插件 → 搜索 **File Viewer** → 安装启用。
+打开 Obsidian → 设置 → 社区插件 → 搜索 **Vault Lens** → 安装启用。
 
 ### 手动安装
 
-1. 在 [Releases](https://github.com/leo-su-zhan/obsidian-file-viewer/releases) 下载最新版
+1. 在 [Releases](https://github.com/leo-su-zhan/obsidian-vault-lens/releases) 下载最新版
 2. 将 `main.js`、`manifest.json`、`styles.css` 放入 `.obsidian/plugins/file-viewer/`
 3. 在 Obsidian 设置 → 社区插件中启用
 
 ## 开发
 
 ```bash
-git clone https://github.com/leo-su-zhan/obsidian-file-viewer.git
-cd obsidian-file-viewer
+git clone https://github.com/leo-su-zhan/obsidian-vault-lens.git
+cd obsidian-vault-lens
 npm install
 npm run dev      # 开发模式（监听）
 npm run build    # 生产构建
@@ -59,3 +59,4 @@ npm run build    # 生产构建
 ## 许可证
 
 MIT
+
