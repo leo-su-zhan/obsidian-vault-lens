@@ -1,0 +1,268 @@
+/* ===== File Preview Container ===== */
+.file-preview-container {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	background: var(--background-primary);
+}
+
+/* ===== Toolbar ===== */
+.file-preview-toolbar {
+	display: flex;
+	gap: 4px;
+	padding: 6px 12px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+	flex-shrink: 0;
+}
+
+.file-preview-toolbar-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 32px;
+	height: 28px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-muted);
+	user-select: none;
+	transition: background 0.15s;
+}
+
+.file-preview-toolbar-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
+}
+
+/* Edit mode for code files */
+.file-preview-editing {
+	background: var(--background-primary) !important;
+	outline: 2px solid var(--interactive-accent) !important;
+	outline-offset: -2px;
+	border-radius: 4px;
+	white-space: pre-wrap !important;
+	word-break: break-all !important;
+	min-height: 200px;
+}
+
+.file-preview-editing:focus {
+	outline: 2px solid var(--interactive-accent-hover) !important;
+}
+
+/* ===== Zoom Wrapper ===== */
+.file-preview-zoom-wrapper {
+	flex: 1;
+	overflow: auto;
+	padding: 16px;
+	cursor: default;
+}
+
+.file-preview-zoom-wrapper.file-preview-grabbing {
+	cursor: grabbing;
+}
+
+.file-preview-content {
+	transform-origin: 0 0;
+	transition: transform 0.05s;
+}
+
+/* ===== Zoom Indicator ===== */
+.file-preview-zoom-indicator {
+	position: absolute;
+	bottom: 12px;
+	right: 12px;
+	padding: 2px 8px;
+	border-radius: 4px;
+	background: var(--background-modifier-border);
+	color: var(--text-muted);
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+	pointer-events: none;
+}
+
+/* ===== Loading / Error / Empty ===== */
+.file-preview-loading,
+.file-preview-error,
+.file-preview-empty {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 200px;
+	color: var(--text-muted);
+	font-size: 14px;
+	padding: 32px;
+	text-align: center;
+}
+
+.file-preview-error {
+	color: var(--text-error);
+}
+
+.file-preview-warnings {
+	margin-top: 16px;
+	padding: 8px 12px;
+	border-radius: 4px;
+	background: var(--background-modifier-warning);
+	color: var(--text-warning);
+	font-size: 12px;
+}
+
+/* ===== TXT Preview ===== */
+.file-preview-txt {
+	margin: 0;
+	font-family: var(--font-monospace);
+	font-size: 13px;
+	line-height: 1.6;
+	width: 100%;
+	border-collapse: collapse;
+}
+
+.file-preview-txt td.line-num {
+	padding-right: 12px;
+	color: var(--text-faint);
+	text-align: right;
+	user-select: none;
+	vertical-align: top;
+	white-space: nowrap;
+	width: 40px;
+	min-width: 40px;
+}
+
+.file-preview-txt td.line-content {
+	white-space: pre-wrap;
+	word-break: break-all;
+	border: none !important;
+	outline: none !important;
+}
+
+/* Editing state for code files */
+.file-preview-editing {
+	background: transparent !important;
+	outline: none !important;
+	border: none !important;
+	box-shadow: none !important;
+}
+
+/* ===== DOCX Preview ===== */
+.file-preview-docx {
+	font-family: var(--font-text);
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+.file-preview-docx h1 { font-size: 1.8em; margin: 0.5em 0; }
+.file-preview-docx h2 { font-size: 1.5em; margin: 0.4em 0; }
+.file-preview-docx h3 { font-size: 1.25em; margin: 0.3em 0; }
+.file-preview-docx p { margin: 0.5em 0; line-height: 1.6; }
+.file-preview-docx table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+.file-preview-docx th, .file-preview-docx td {
+	border: 1.5px solid var(--text-muted);
+	padding: 6px 10px;
+	text-align: left;
+}
+.file-preview-docx th {
+	background: var(--background-secondary);
+	font-weight: 600;
+}
+.file-preview-docx img { max-width: 100%; height: auto; }
+
+/* Page break separator for DOCX */
+.docx-page-break {
+	display: block;
+	border: none;
+	border-top: 1.5px dashed var(--text-faint);
+	margin: 24px 0;
+	opacity: 0.6;
+}
+
+/* ===== XLSX Preview ===== */
+.file-preview-xlsx {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.xlsx-toolbar {
+	flex-shrink: 0;
+	border-bottom: 1px solid var(--background-modifier-border);
+	margin-bottom: 8px;
+}
+
+.xlsx-tabs {
+	display: flex;
+	gap: 2px;
+	padding: 4px 0;
+}
+
+.xlsx-tab {
+	padding: 4px 12px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 13px;
+	color: var(--text-muted);
+	transition: background 0.15s;
+}
+
+.xlsx-tab:hover {
+	background: var(--background-modifier-hover);
+}
+
+.xlsx-tab.active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.xlsx-sheet {
+	display: none;
+}
+
+.xlsx-sheet.active {
+	display: block;
+}
+
+.xlsx-sheet table {
+	border-collapse: collapse;
+	font-size: 13px;
+	width: 100%;
+}
+
+.xlsx-sheet th, .xlsx-sheet td {
+	border: 1px solid var(--background-modifier-border);
+	padding: 4px 8px;
+	white-space: nowrap;
+}
+
+.xlsx-sheet th {
+	background: var(--background-secondary);
+	font-weight: 600;
+}
+
+.xlsx-info {
+	margin-top: 8px;
+	font-size: 12px;
+	color: var(--text-faint);
+	text-align: right;
+}
+
+/* ===== PPT Preview ===== */
+.ppt-slide-card {
+	box-sizing: border-box;
+}
+
+.ppt-slide-card * {
+	box-sizing: border-box;
+}
+
+/* ===== Dark Theme Adjustments ===== */
+.theme-dark .file-preview-docx table,
+.theme-dark .xlsx-sheet table {
+	border-color: var(--background-modifier-border);
+}
+
+.theme-dark .ppt-slide-card {
+	border-color: var(--background-modifier-border);
+	background: var(--background-secondary);
+}
