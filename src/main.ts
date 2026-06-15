@@ -69,13 +69,11 @@ class FilePreviewView extends FileView {
 		this.contentEl.empty();
 	}
 
-	/** Replace innerHTML with Obsidian-safe DOM insertion */
 	private setHtml(parent: HTMLElement, html: string) {
 		parent.empty();
-		if (html) {
-			const temp = parent.createDiv();
-			temp.innerHTML = html;
-		}
+		if (!html) return;
+		const frag = document.createRange().createContextualFragment(html);
+		parent.appendChild(frag);
 	}
 
 	private async renderFile(file: TFile): Promise<string> {
@@ -326,8 +324,8 @@ class FilePreviewView extends FileView {
 		this.zoomLevel = Math.max(0.25, Math.min(2, Math.round(lv * 100) / 100));
 		el.setAttribute("style", `transform:scale(${this.zoomLevel});transform-origin:0 0`);
 		if (this.zoomLevel === 1) {
-			el.style.width = "";
-			el.style.height = "";
+			el.style.removeProperty("width");
+			el.style.removeProperty("height");
 			el.removeAttribute("data-ow");
 			el.removeAttribute("data-oh");
 		} else {
@@ -335,8 +333,8 @@ class FilePreviewView extends FileView {
 			if (!el.getAttribute("data-oh")) el.setAttribute("data-oh", String(el.scrollHeight));
 			const _ow = parseInt(el.getAttribute("data-ow")!);
 			const _oh = parseInt(el.getAttribute("data-oh")!);
-			el.style.width = (_ow * this.zoomLevel) + "px";
-			el.style.height = (_oh * this.zoomLevel) + "px";
+			el.style.setProperty("width", (_ow * this.zoomLevel) + "px");
+			el.style.setProperty("height", (_oh * this.zoomLevel) + "px");
 		}
 		this.zoomIndicatorEl.setText(`${Math.round(this.zoomLevel * 100)}%`);
 	}

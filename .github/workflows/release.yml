@@ -1,9 +1,9 @@
-﻿name: Build and Release
+name: Build and Release
 
 on:
   push:
     tags:
-      - "0.*"
+      - "*"
 
 jobs:
   build:
