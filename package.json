@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-vault-lens",
 	"version": "0.1.0",
-	"description": "Preview docx/xlsx/pptx and 60+ code files (sql/java/py/js/ts/...). Zoom, edit & save, line numbers, XLSX tabs.",
+	"description": "Preview docx/xlsx/pptx and 60+ code files (sql/java/py/js/ts/...). Syntax highlighting, zoom, edit & save, line numbers, XLSX tabs.",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
@@ -16,6 +16,7 @@
 	},
 	"dependencies": {
 		"@aiden0z/pptx-renderer": "^1.1.0",
+		"highlight.js": "^11.11.1",
 		"jszip": "^3.10.1",
 		"mammoth": "^1.8.0",
 		"xlsx": "^0.18.5"

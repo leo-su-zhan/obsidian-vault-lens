@@ -3,8 +3,9 @@ import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 import { PptxViewer, RECOMMENDED_ZIP_LIMITS } from "@aiden0z/pptx-renderer";
 import JSZip from "jszip";
+import hljs from "highlight.js";
 
-const VIEW_TYPE = "file-preview";
+const VIEW_TYPE = "file-preview-dev";
 const CODE_EXTENSIONS = [
 	"txt", "sql", "java", "py", "js", "ts", "jsx", "tsx", "json", "xml", "yaml", "yml",
 	"properties", "cfg", "ini", "sh", "bat", "cmd", "ps1", "css", "html", "htm",
@@ -16,10 +17,131 @@ const CODE_EXTENSIONS = [
 const BINARY_EXTENSIONS = ["docx", "xlsx", "xls", "pptx"];
 const ALL_EXTENSIONS = [...CODE_EXTENSIONS, ...BINARY_EXTENSIONS];
 
+// highlight.js 语言映射表
+const HLJS_LANG: Record<string, string | undefined> = {
+	sql: "sql", java: "java", py: "python",
+	js: "javascript", ts: "typescript", jsx: "jsx", tsx: "tsx",
+	json: "json", xml: "xml", yaml: "yaml", yml: "yaml",
+	properties: "properties", cfg: "ini", ini: "ini",
+	sh: "bash", bat: "dos", cmd: "dos", ps1: "powershell",
+	css: "css", html: "html", htm: "html",
+	rst: undefined, tex: "tex",
+	php: "php", rb: "ruby", go: "go", rs: "rust",
+	c: "c", cpp: "cpp", h: undefined, hpp: "cpp", cs: "csharp",
+	swift: "swift", kt: "kotlin", scala: "scala", groovy: "groovy",
+	pl: "perl", pm: "perl", lua: "lua", r: "r",
+	m: "objectivec", mm: "objectivec",
+	gradle: "gradle", toml: "toml", conf: "ini",
+	env: undefined, makefile: "makefile", dockerfile: "dockerfile",
+	gitignore: undefined, vue: "html",
+	sass: "scss", scss: "scss", less: "less", styl: "stylus",
+	coffee: "coffeescript", dart: "dart",
+	erl: "erlang", ex: "elixir", exs: "elixir",
+};
+
+const HIGHLIGHT_MAX_SIZE = 100 * 1024; // >100KB 跳过语法高亮
+// highlightAuto 只在已映射的语言中检测，避免扫描全部 190+ 种
+const HLJS_LANG_VALUES: string[] = Object.values(HLJS_LANG).filter((v): v is string => v !== undefined);
+
+function getHljsLang(ext: string): string | undefined {
+	const key = ext.toLowerCase();
+	return key in HLJS_LANG ? HLJS_LANG[key] : undefined;
+}
+
+/** 将 hljs 高亮后的 HTML 按行拆开，正确处理跨行 span */
+function splitHighlightedLines(html: string): string[] {
+	const container = document.createElement("div");
+	container.innerHTML = html;
+	const lines: string[] = [];
+	let currentLine = "";
+	// 栈里存 { open: "<span class=...>", close: "</span>" }
+	const tagStack: Array<{ open: string; close: string }> = [];
+
+	function walk(node: Node) {
+		if (node.nodeType === Node.TEXT_NODE) {
+			const text = node.textContent || "";
+			const parts = text.split("\n");
+			for (let i = 0; i < parts.length; i++) {
+				if (i > 0) {
+					// 关闭当前行所有标签
+					const closing = tagStack.slice().reverse().map(t => t.close).join("");
+					lines.push(currentLine + closing);
+					// 新行重开所有标签
+					currentLine = tagStack.map(t => t.open).join("");
+				}
+				// hljs 输出的文本已经是 HTML 安全的，但 textContent 解码了，需要重新转义
+				const escaped = parts[i].replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+				currentLine += escaped;
+			}
+		} else if (node.nodeType === Node.ELEMENT_NODE) {
+			const el = node as HTMLElement;
+			const tag = el.tagName.toLowerCase();
+			let attrs = "";
+			for (let i = 0; i < el.attributes.length; i++) {
+				const a = el.attributes[i];
+				attrs += ` ${a.name}="${a.value.replace(/"/g, "&quot;")}"`;
+			}
+			const open = `<${tag}${attrs}>`;
+			const close = `</${tag}>`;
+			tagStack.push({ open, close });
+			currentLine += open;
+			for (let i = 0; i < el.childNodes.length; i++) {
+				walk(el.childNodes[i]);
+			}
+			currentLine += close;
+			tagStack.pop();
+		}
+	}
+
+	for (let i = 0; i < container.childNodes.length; i++) {
+		walk(container.childNodes[i]);
+	}
+	if (currentLine) lines.push(currentLine);
+	// 保留末尾空行
+	if (html.endsWith("\n")) lines.push("");
+	return lines;
+}
+
 export default class FilePreviewPlugin extends Plugin {
 	async onload() {
 		this.registerView(VIEW_TYPE, (leaf) => new FilePreviewView(leaf));
-		this.registerExtensions(ALL_EXTENSIONS, VIEW_TYPE);
+		// 逐个注册扩展名——某个被占用不影响其他的
+		for (const ext of ALL_EXTENSIONS) {
+			try {
+				this.registerExtensions([ext], VIEW_TYPE);
+			} catch (e) {
+				// 扩展名已被其他插件注册，跳过即可
+			}
+		}
+		// 添加侧边栏图标
+		this.addRibbonIcon("eye", "Vault Lens Dev: 打开当前文件", () => {
+			this.openCurrentFileInDevView();
+		});
+		// 添加命令，手动用开发版打开当前文件
+		this.addCommand({
+			id: "open-with-vault-lens-dev",
+			name: "用 Vault Lens Dev 打开当前文件",
+			callback: () => this.openCurrentFileInDevView(),
+		});
+	}
+
+	private async openCurrentFileInDevView() {
+		const file = this.app.workspace.getActiveFile();
+		if (!file) {
+			new Notice("没有打开的文件");
+			return;
+		}
+		const ext = file.extension.toLowerCase();
+		if (!ALL_EXTENSIONS.includes(ext)) {
+			new Notice(`Vault Lens Dev 不支持 .${ext} 文件`);
+			return;
+		}
+		// 用 setViewState 强制以开发版的视图类型打开
+		const leaf = this.app.workspace.getLeaf();
+		await leaf.setViewState({
+			type: VIEW_TYPE,
+			state: { file: file.path },
+		});
 	}
 }
 
@@ -31,6 +153,7 @@ class FilePreviewView extends FileView {
 	private pptxViewer: any | null = null;
 	private editing = false;
 	private isCodeFile = false;
+	private textareaEl: HTMLTextAreaElement | null = null;
 
 	constructor(leaf: WorkspaceLeaf) { super(leaf); }
 	getViewType(): string { return VIEW_TYPE; }
@@ -85,7 +208,7 @@ class FilePreviewView extends FileView {
 		if (ext === "docx") return await this.renderDocx(file);
 		if (["xlsx", "xls"].includes(ext)) return await this.renderXlsx(file);
 		const content = await this.app.vault.read(file);
-		return this.renderCodeWithLineNumbers(content);
+		return this.renderCodeWithLineNumbers(content, ext);
 	}
 
 	private async renderDocx(file: TFile): Promise<string> {
@@ -274,7 +397,26 @@ class FilePreviewView extends FileView {
 		});
 	}
 
-	private renderCodeWithLineNumbers(content: string): string {
+	private renderCodeWithLineNumbers(content: string, ext?: string): string {
+		// 大文件跳过语法高亮
+		if (ext && content.length <= HIGHLIGHT_MAX_SIZE) {
+			try {
+				const lang = getHljsLang(ext);
+				let highlighted: string;
+				if (lang) {
+					highlighted = hljs.highlight(content, { language: lang, ignoreIllegals: true }).value;
+				} else {
+					highlighted = hljs.highlightAuto(content, HLJS_LANG_VALUES).value;
+				}
+				const hlLines = splitHighlightedLines(highlighted);
+				return `<table class="file-preview-txt">${hlLines.map((line, i) =>
+					`<tr><td class="line-num">${i + 1}</td><td class="line-content">${line || " "}</td></tr>`
+				).join("\n")}</table>`;
+			} catch (e) {
+				// 高亮失败回退到纯文本
+				console.warn("Vault Lens: hljs highlighting failed, falling back to plain text", e);
+			}
+		}
 		const lines = content.split("\n");
 		return `<table class="file-preview-txt">${lines.map((line, i) =>
 			`<tr><td class="line-num">${i + 1}</td><td class="line-content">${this.esc(line) || " "}</td></tr>`).join("\n")}</table>`;
@@ -287,21 +429,78 @@ class FilePreviewView extends FileView {
 			const eb = c.createSpan({ cls: "file-preview-toolbar-btn", text: "✏️ 编辑" });
 			eb.addEventListener("click", async () => {
 				if (!this.editing) {
-					const cells = this.contentArea.querySelectorAll(".line-content");
-					if (cells.length > 0) {
-						cells.forEach(c => { c.setAttr("contenteditable", "true"); c.addClass("file-preview-editing"); });
-						this.editing = true; eb.textContent = "💾 保存"; new Notice("编辑模式 — 修改后点击「保存」");
-						this.wrapper.addClass("file-preview-edit-cursor");
-						(cells[0] as HTMLElement).focus();
-					}
+					const lines: string[] = [];
+					this.contentArea.querySelectorAll(".line-content").forEach(c => lines.push(c.textContent || ""));
+					const fullText = lines.join("\n");
+					// 隐藏代码表格和 contentArea
+					const table = this.contentArea.querySelector("table.file-preview-txt") as HTMLElement | null;
+					if (table) table.style.display = "none";
+					this.contentArea.style.display = "none";
+
+					// 编辑模式：wrapper 去掉滚动和内边距
+					this.wrapper.addClass("file-preview-editing-wrapper");
+
+					// 创建编辑容器（挂到 wrapper 上，和 contentArea 平级）
+					const editorWrap = document.createElement("div");
+					editorWrap.className = "file-preview-editor-wrap";
+
+					const lineNumDiv = document.createElement("div");
+					lineNumDiv.className = "file-preview-line-nums";
+
+					const textarea = document.createElement("textarea");
+					textarea.className = "file-preview-textarea";
+					textarea.value = fullText;
+					textarea.spellcheck = false;
+					this.textareaEl = textarea;
+
+					const lineCount = fullText.split("\n").length;
+					lineNumDiv.innerHTML = Array.from({ length: lineCount }, (_, i) => `<span>${i + 1}</span>`).join("");
+
+					editorWrap.appendChild(lineNumDiv);
+					editorWrap.appendChild(textarea);
+					this.wrapper.appendChild(editorWrap);
+
+					// 同步滚动
+					textarea.addEventListener("scroll", () => {
+						lineNumDiv.scrollTop = textarea.scrollTop;
+					});
+
+					// 内容变化时更新行号
+					textarea.addEventListener("input", () => {
+						const newCount = textarea.value.split("\n").length;
+						const currentCount = lineNumDiv.children.length;
+						if (newCount !== currentCount) {
+							lineNumDiv.innerHTML = Array.from({ length: newCount }, (_, i) => `<span>${i + 1}</span>`).join("");
+						}
+					});
+
+					// Tab 键输入制表符（而非跳转焦点）
+					textarea.addEventListener("keydown", (e: KeyboardEvent) => {
+						if (e.key === "Tab") {
+							e.preventDefault();
+							const start = textarea.selectionStart;
+							const end = textarea.selectionEnd;
+							textarea.value = textarea.value.substring(0, start) + "\t" + textarea.value.substring(end);
+							textarea.selectionStart = textarea.selectionEnd = start + 1;
+							// 触发 input 事件
+							textarea.dispatchEvent(new Event("input"));
+						}
+					});
+
+					this.editing = true; eb.textContent = "💾 保存"; new Notice("编辑模式 — Ctrl+S 保存");
+					textarea.focus();
 				} else if (this.file) {
 					try {
-						const lines: string[] = [];
-						this.contentArea.querySelectorAll(".line-content").forEach(c => lines.push(c.textContent || ""));
-						await this.app.vault.modify(this.file, lines.join("\n"));
+						const text = this.textareaEl ? this.textareaEl.value : "";
+						await this.app.vault.modify(this.file, text);
 						new Notice("已保存"); this.editing = false; eb.textContent = "✏️ 编辑";
-						this.setHtml(this.contentArea, this.renderCodeWithLineNumbers(lines.join("\n")));
-						this.wrapper.removeClass("file-preview-edit-cursor");
+						// 移除编辑容器，恢复 contentArea 和 wrapper 滚动
+						const wrap = this.wrapper.querySelector(".file-preview-editor-wrap") as HTMLElement | null;
+						if (wrap) { wrap.remove(); }
+						this.textareaEl = null;
+						this.contentArea.style.display = "";
+						this.wrapper.removeClass("file-preview-editing-wrapper");
+						this.setHtml(this.contentArea, this.renderCodeWithLineNumbers(text, this.file!.extension));
 					} catch (e) {
 						new Notice("保存失败: " + (e instanceof Error ? e.message : String(e)));
 					}

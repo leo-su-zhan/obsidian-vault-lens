@@ -1,9 +1,9 @@
 {
 	"id": "vault-lens",
 	"name": "Vault Lens",
-	"version": "1.0.9",
+	"version": "1.0.10",
 	"minAppVersion": "1.5.0",
-	"description": "Preview docx/xlsx/pptx and 60+ code files (sql/java/py/js/ts/...). Zoom, edit & save, line numbers, XLSX tabs.",
+	"description": "Preview docx/xlsx/pptx and 60+ code files (sql/java/py/js/ts/...). Syntax highlighting, zoom, edit & save, line numbers, XLSX tabs.",
 	"author": "suzhan",
 	"isDesktopOnly": false
 }

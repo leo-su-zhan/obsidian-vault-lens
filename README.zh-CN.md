@@ -2,7 +2,7 @@
 
 [![GitHub release](https://img.shields.io/github/v/release/leo-su-zhan/obsidian-vault-lens)](https://github.com/leo-su-zhan/obsidian-vault-lens/releases)
 
-一款 Obsidian 插件，支持在 Obsidian 内直接预览 **docx / xlsx / pptx / 代码文件** 等常见文件。支持缩放、编辑保存、行号显示、工作表切换。
+一款 Obsidian 插件，支持在 Obsidian 内直接预览 **docx / xlsx / pptx / 代码文件** 等常见文件。支持**语法高亮**、缩放、编辑保存、行号显示、工作表切换。
 
 ## 功能
 
@@ -25,13 +25,14 @@
 `.gradle` `.toml` `.conf` `.env` `.makefile` `.dockerfile` `.gitignore`
 `.vue` `.sass` `.scss` `.less` `.styl` `.coffee` `.dart` `.erl` `.ex` `.exs`
 
-**行号显示 · 编辑并保存 · Ctrl+S 快捷键 · 缩放 25%~200%**
+**语法高亮 · 行号显示 · 编辑并保存 · Ctrl+S 快捷键 · 缩放 25%~200%**
 
 ### 🔍 通用特性
 
 - **缩放** — 工具栏 +/− 按钮，Ctrl+滚轮快速缩放，1:1 复位
 - **拖拽平移** — 缩放后按住鼠标拖拽查看内容
-- **编辑文本** — 对代码文件点击「✏️ 编辑」，修改后点击「💾 保存」
+- **编辑文本** — 对代码文件点击「✏️ 编辑」，行号+文本域编辑模式（Tab缩进、全选、方向键均支持），修改后点击「💾 保存」
+- **语法高亮** — 基于 highlight.js 支持 190+ 编程语言，自动识别文件类型着色
 - **工作表切换** — XLSX 多 sheet 场景，点击顶部标签切换
 
 ## 安装

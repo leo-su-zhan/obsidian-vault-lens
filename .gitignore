@@ -4,3 +4,5 @@ main.js.map
 *.tsbuildinfo
 .vscode/
 .obsidian/
+.codegraph/
+.reasonix/

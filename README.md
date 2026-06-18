@@ -2,7 +2,7 @@
 
 [![GitHub release](https://img.shields.io/github/v/release/leo-su-zhan/obsidian-vault-lens)](https://github.com/leo-su-zhan/obsidian-vault-lens/releases)
 
-A plugin for Obsidian that previews **docx / xlsx / pptx / code files** directly in the editor. Supports zoom, inline editing, line numbers, and sheet tabs.
+A plugin for Obsidian that previews **docx / xlsx / pptx / code files** directly in the editor. Supports **syntax highlighting**, zoom, inline editing, line numbers, and sheet tabs.
 
 ## Features
 
@@ -25,13 +25,14 @@ A plugin for Obsidian that previews **docx / xlsx / pptx / code files** directly
 `.gradle` `.toml` `.conf` `.env` `.makefile` `.dockerfile` `.gitignore`
 `.vue` `.sass` `.scss` `.less` `.styl` `.coffee` `.dart` `.erl` `.ex` `.exs`
 
-**Line numbers · Edit & save · Ctrl+S shortcut · Zoom 25%–200%**
+**Syntax highlighting (highlight.js) · Line numbers · Edit & save · Ctrl+S shortcut · Zoom 25%–200%**
 
 ### 🔍 Common
 
 - **Zoom** — Toolbar +/− buttons or Ctrl+scroll, reset to 1:1
 - **Pan** — Drag to pan when zoomed in
-- **Edit** — Click ✏️ Edit on any code file, modify, then 💾 Save
+- **Edit** — Click ✏️ Edit on any code file, modify with full textarea (line numbers, Tab support, Ctrl+A), then 💾 Save
+- **Syntax highlighting** — 190+ languages supported via highlight.js, auto-detects file type
 - **Sheet tabs** — Switch between XLSX sheets with tab headers
 
 ## Installation
