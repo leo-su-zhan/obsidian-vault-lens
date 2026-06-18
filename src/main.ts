@@ -50,8 +50,8 @@ function getHljsLang(ext: string): string | undefined {
 
 /** 将 hljs 高亮后的 HTML 按行拆开，正确处理跨行 span */
 function splitHighlightedLines(html: string): string[] {
-	const container = document.createElement("div");
-	container.innerHTML = html;
+	const doc = new DOMParser().parseFromString(html, "text/html");
+	const container = doc.body;
 	const lines: string[] = [];
 	let currentLine = "";
 	// 栈里存 { open: "<span class=...>", close: "</span>" }
@@ -434,8 +434,8 @@ class FilePreviewView extends FileView {
 					const fullText = lines.join("\n");
 					// 隐藏代码表格和 contentArea
 					const table = this.contentArea.querySelector("table.file-preview-txt") as HTMLElement | null;
-					if (table) table.style.display = "none";
-					this.contentArea.style.display = "none";
+					if (table) table.addClass("file-preview-hide");
+					this.contentArea.addClass("file-preview-hide");
 
 					// 编辑模式：wrapper 去掉滚动和内边距
 					this.wrapper.addClass("file-preview-editing-wrapper");
@@ -454,7 +454,9 @@ class FilePreviewView extends FileView {
 					this.textareaEl = textarea;
 
 					const lineCount = fullText.split("\n").length;
-					lineNumDiv.innerHTML = Array.from({ length: lineCount }, (_, i) => `<span>${i + 1}</span>`).join("");
+					for (let i = 0; i < lineCount; i++) {
+						lineNumDiv.createSpan({ text: String(i + 1) });
+					}
 
 					editorWrap.appendChild(lineNumDiv);
 					editorWrap.appendChild(textarea);
@@ -470,7 +472,10 @@ class FilePreviewView extends FileView {
 						const newCount = textarea.value.split("\n").length;
 						const currentCount = lineNumDiv.children.length;
 						if (newCount !== currentCount) {
-							lineNumDiv.innerHTML = Array.from({ length: newCount }, (_, i) => `<span>${i + 1}</span>`).join("");
+							while (lineNumDiv.firstChild) lineNumDiv.firstChild.remove();
+							for (let i = 0; i < newCount; i++) {
+								lineNumDiv.createSpan({ text: String(i + 1) });
+							}
 						}
 					});
 
@@ -498,7 +503,7 @@ class FilePreviewView extends FileView {
 						const wrap = this.wrapper.querySelector(".file-preview-editor-wrap") as HTMLElement | null;
 						if (wrap) { wrap.remove(); }
 						this.textareaEl = null;
-						this.contentArea.style.display = "";
+						this.contentArea.removeClass("file-preview-hide");
 						this.wrapper.removeClass("file-preview-editing-wrapper");
 						this.setHtml(this.contentArea, this.renderCodeWithLineNumbers(text, this.file!.extension));
 					} catch (e) {

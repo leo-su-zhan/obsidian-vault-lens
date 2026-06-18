@@ -175,6 +175,11 @@
 	overflow: auto;
 }
 
+/* ===== Utility: hide elements without inline style ===== */
+.file-preview-hide {
+	display: none !important;
+}
+
 /* ===== Syntax Highlighting (highlight.js) ===== */
 .file-preview-txt .hljs-comment,
 .file-preview-txt .hljs-quote {
